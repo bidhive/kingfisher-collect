@@ -106,6 +106,7 @@ import itertools
 
 
 def read_dirs(path: str):
+    path = os.path.join("..", path)
     if not isdir(path):
         raise ValueError("Path is not a directory")
 
