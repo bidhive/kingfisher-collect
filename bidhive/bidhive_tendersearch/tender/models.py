@@ -19,7 +19,7 @@ class Tender(models.Model):
 
     @property
     def latest_release(self):
-        return self.releases.last()
+        return self.releases.order_by("date").last()
 
 
 class TenderRelease(models.Model):

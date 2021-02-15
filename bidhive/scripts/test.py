@@ -31,7 +31,7 @@ def run(*args):
         items = read_dirs(path)
 
         for item in items:
-            releases = item.pop("releases")
+            releases = sorted(item.pop("releases"), key=lambda r: r.get("date"))
             item_object = Tender.objects.create(**item)
             for release in releases:
                 try:
