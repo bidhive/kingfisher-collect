@@ -4,6 +4,7 @@ from django.contrib.postgres.fields import ArrayField
 
 
 class Tender(models.Model):
+    name = models.CharField(max_length=1024, null=True)
     uri = models.CharField(max_length=1024)
     publisher = models.JSONField()
     publishedDate = models.DateTimeField()
@@ -11,9 +12,14 @@ class Tender(models.Model):
     version = models.CharField(max_length=1024)
     extensions = models.JSONField(null=True)
     links = models.JSONField(null=True)
+    publicationPolicy = models.JSONField(null=True)
 
     class Meta:
         db_table = "bidhive_tendersearch_tender"
+
+    @property
+    def latest_release(self):
+        return self.releases.last()
 
 
 class TenderRelease(models.Model):
@@ -29,6 +35,7 @@ class TenderRelease(models.Model):
     contracts = ArrayField(models.JSONField(), default=list)
     planning = models.JSONField(null=True)
     tender = models.JSONField(null=True)
+    buyer = models.JSONField(null=True)
 
     item = models.ForeignKey(Tender, related_name="releases", on_delete=models.CASCADE)
 

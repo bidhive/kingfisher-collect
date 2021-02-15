@@ -1,9 +1,9 @@
-from rest_framework.serializers import ModelSerializer, JSONField
+from rest_framework import serializers
 
 from .models import Tender, TenderRelease
 
 
-class DisableCreateUpdateSerializer(ModelSerializer):
+class DisableCreateUpdateSerializer(serializers.ModelSerializer):
     def create(self):
         raise ValueError(
             f"Cannot create serialised instances of {self.__class__.__name__}"
@@ -16,11 +16,11 @@ class DisableCreateUpdateSerializer(ModelSerializer):
 
 
 class TenderReleaseSerializer(DisableCreateUpdateSerializer):
-    parties = JSONField()
-    awards = JSONField()
-    contracts = JSONField()
-    planning = JSONField()
-    tender = JSONField()
+    parties = serializers.JSONField()
+    awards = serializers.JSONField()
+    contracts = serializers.JSONField()
+    planning = serializers.JSONField()
+    tender = serializers.JSONField()
 
     class Meta:
         model = TenderRelease
@@ -40,9 +40,10 @@ class TenderReleaseSerializer(DisableCreateUpdateSerializer):
 
 
 class TenderSerializer(DisableCreateUpdateSerializer):
-    publisher = JSONField()
-    extensions = JSONField()
-    links = JSONField()
+    publisher = serializers.JSONField()
+    extensions = serializers.JSONField()
+    links = serializers.JSONField()
+    latest_release = serializers.SerializerMethodField()
 
     class Meta:
         model = Tender
@@ -55,4 +56,16 @@ class TenderSerializer(DisableCreateUpdateSerializer):
             "version",
             "extensions",
             "links",
+            "latest_release",
         )
+
+    def get_latest_release(self, instance: Tender):
+        return TenderReleaseSerializer(instance.latest_release).data
+
+
+class TenderNameSerializer(DisableCreateUpdateSerializer):
+    publisher = serializers.JSONField()
+
+    class Meta:
+        model = Tender
+        fields = ("id", "publiser")

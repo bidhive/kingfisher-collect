@@ -25,7 +25,9 @@ SECRET_KEY = "a3yp-=u(ro90ctotlm=m@!lghyg&q17s3_^e%hmr+m7p_#s7o+"
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+LOCAL_FRONTEND_URL = "http://localhost:3000"
 ALLOWED_HOSTS = ["*"]
+CORS_ORIGIN_WHITELIST = [LOCAL_FRONTEND_URL]
 
 
 # Application definition
@@ -39,10 +41,12 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django_extensions",
     "rest_framework",
+    "corsheaders",
     "bidhive_tendersearch",
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -119,3 +123,23 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = "/static/"
+
+#
+# CORS
+#
+
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = (
+    "access-control-allow-origin",
+    "access-control-allow-headers",
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "content-disposition",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+)
