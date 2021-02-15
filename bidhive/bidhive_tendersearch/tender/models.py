@@ -17,8 +17,8 @@ class Tender(models.Model):
 
 
 class TenderRelease(models.Model):
-    ocid = models.CharField(max_length=1024, null=True)
     id = models.CharField(max_length=1024, primary_key=True)
+    ocid = models.CharField(max_length=1024, null=True)
     date = models.DateTimeField(default=timezone.now)
     initiationType = models.CharField(max_length=1024, null=True)
     tag = ArrayField(models.CharField(max_length=1024, blank=True), default=list)
