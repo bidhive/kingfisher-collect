@@ -1,7 +1,6 @@
 # Bidhive defined utils
 import os
 from os.path import isfile, isdir
-import sys
 import json
 
 # Release format
@@ -66,7 +65,6 @@ def format_release(release: dict):
 
 def format_item(item_json: str):
     item = json.loads(item_json)
-    return item
     # for key in item.keys():
     #     if key != "releases":
     #         print(item.get(key))
@@ -86,6 +84,8 @@ def format_item(item_json: str):
     # releases = item.pop("releases")
     # for release in releases:
     #     format_release(release)
+
+    return item
 
 
 def read_dir(path: str, dir_name: str):
