@@ -19,17 +19,14 @@ def run(*args):
 
     path = os.path.join("data", "australia_sample")
     items = read_dirs(path)
-    item = items[0]
 
-    releases = item.pop("releases")
-    release = releases[0]
-
-    item_object = Tender.objects.create(**item)
-
-    for key in release.keys():
-        try:
-            TenderRelease.objects.create(**release, item_id=item_object.id)
-        except IntegrityError:
-            continue
+    for item in items:
+        releases = item.pop("releases")
+        item_object = Tender.objects.create(**item)
+        for release in releases:
+            try:
+                TenderRelease.objects.create(**release, item=item_object)
+            except IntegrityError:
+                continue
 
     shutil.rmtree(os.path.join("data"))
