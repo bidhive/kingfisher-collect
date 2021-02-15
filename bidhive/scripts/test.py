@@ -1,31 +1,35 @@
 import os
-import sys
 import subprocess
+import shutil
 
-from ..utils import read_dirs
+from django.db.utils import IntegrityError
+from bidhive_tendersearch.models import Tender, TenderRelease
+from utils import read_dirs
 
 DEFAULT_TENDER_COUNT = 10
 DEFAULT_FROM_DATE = "2021-02-01"
 
 
-def run():
-    print("AAAAAAAA")
-    subprocess.call(
-        f"scrapy crawl australia -a from_date={DEFAULT_FROM_DATE} -a sample={DEFAULT_TENDER_COUNT}",
-        shell=True,
-    )
-    read_dirs("data")
+def run(*args):
+    if "scrape" in args:
+        subprocess.call(
+            f"scrapy crawl australia -a from_date={DEFAULT_FROM_DATE} -a sample={DEFAULT_TENDER_COUNT}",
+            shell=True,
+        )
 
+    path = os.path.join("data", "australia_sample")
+    items = read_dirs(path)
+    item = items[0]
 
-# COUNT=$1
-# if [ -z $COUNT ]
-# then
-#     COUNT=10
-# fi
+    releases = item.pop("releases")
+    release = releases[0]
 
-# cd ..
-# scrapy crawl australia -a from_date=2021-02-01 -a sample=$COUNT
+    item_object = Tender.objects.create(**item)
 
-# cd bidhive
-# export FLASK_APP=server.py
-# python -m flask run
+    for key in release.keys():
+        try:
+            TenderRelease.objects.create(**release, item_id=item_object.id)
+        except IntegrityError:
+            continue
+
+    shutil.rmtree(os.path.join("data"))

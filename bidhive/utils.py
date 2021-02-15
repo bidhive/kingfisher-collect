@@ -65,26 +65,6 @@ def format_release(release: dict):
 
 def format_item(item_json: str):
     item = json.loads(item_json)
-    # for key in item.keys():
-    #     if key != "releases":
-    #         print(item.get(key))
-    # print(item.keys())
-
-    # print_details = True
-    # if print_details:
-    #     print("URI: " + item.get("uri"))
-    #     print("Publisher: " + item.get("publisher").get("name"))
-    #     print("Published at: " + item.get("publishedDate"))
-    #     print("Licence: " + item.get("license"))
-    #     print("Version: " + item.get("version"))
-    # print("Releases: " + item.get("releases"))
-    # print("Extensions: " + "".join(item.get("extensions")))
-    # print("Links: " + item.get("links"))
-
-    # releases = item.pop("releases")
-    # for release in releases:
-    #     format_release(release)
-
     return item
 
 
@@ -106,7 +86,6 @@ import itertools
 
 
 def read_dirs(path: str):
-    path = os.path.join("..", path)
     if not isdir(path):
         raise ValueError("Path is not a directory")
 

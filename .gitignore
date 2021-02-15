@@ -12,3 +12,6 @@ venv/
 /htmlcov
 /pluck-*.csv
 /pluck_skipped.json
+
+
+/bidhive/data
