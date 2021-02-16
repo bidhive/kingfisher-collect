@@ -6,12 +6,11 @@ from django.db.utils import IntegrityError
 from bidhive_tendersearch.models import Tender, TenderRelease
 from utils import read_dirs
 
-DEFAULT_TENDER_COUNT = 10
+DEFAULT_TENDER_COUNT = 100
 DEFAULT_FROM_DATE = "2021-02-01"
 DEFAULT_ZONE = "australia"
 
-ZONES = ["australia", "australia_nsw", "uk_contracts_finder", "italy"]
-PATHS = [zone + "_sample" for zone in ZONES]
+ZONES = [country[0] for country in Tender.country_choices]
 
 
 def run(*args):
@@ -25,14 +24,15 @@ def run(*args):
                 shell=True,
             )
 
-    for path in PATHS:
+    for zone in ZONES:
+        path = zone + "_sample"
         print(f"Loading tenders for path: {path}")
         path = os.path.join("data", path)
         items = read_dirs(path)
 
         for item in items:
             releases = sorted(item.pop("releases"), key=lambda r: r.get("date"))
-            item_object = Tender.objects.create(**item)
+            item_object = Tender.objects.create(country=zone, **item)
             for release in releases:
                 try:
                     TenderRelease.objects.create(**release, item=item_object)

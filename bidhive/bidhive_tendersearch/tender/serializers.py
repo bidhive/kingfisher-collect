@@ -49,6 +49,7 @@ class TenderSerializer(DisableCreateUpdateSerializer):
         model = Tender
         fields = (
             "id",
+            "country",
             "uri",
             "publisher",
             "publishedDate",

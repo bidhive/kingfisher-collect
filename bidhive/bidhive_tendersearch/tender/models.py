@@ -4,8 +4,17 @@ from django.contrib.postgres.fields import ArrayField
 
 
 class Tender(models.Model):
+    country_choices = (
+        ("australia", "Australia"),
+        ("australia_nsw", "New South Wales"),
+        ("uk_contracts_finder", "United Kingdom"),
+        ("italy", "Italy"),
+    )
+
     name = models.CharField(max_length=1024, null=True)
     uri = models.CharField(max_length=1024)
+    # Where countries are sourced from via scrapy
+    country = models.CharField(max_length=1024, null=True, choices=country_choices)
     publisher = models.JSONField()
     publishedDate = models.DateTimeField()
     license = models.CharField(max_length=1024)
