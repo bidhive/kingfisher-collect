@@ -33,8 +33,25 @@ def run(*args):
         for item in items:
             releases = sorted(item.pop("releases"), key=lambda r: r.get("date"))
             item_object = Tender.objects.create(country=zone, **item)
+            contract_value = None
+            contract_currency = None
+
             for release in releases:
                 try:
+                    contracts = release.get("contracts")
+                    if contracts is not None:
+                        for contract in contracts:
+                            if "value" in contract:
+                                value = contract.get("value")
+                                if "amount" in value:
+                                    if contract_value is None:
+                                        contract_value = 0
+                                    contract_value += int(
+                                        value.get("amount").split(".")[0]
+                                    )
+
+                                contract_currency = value.get("currency")
+
                     TenderRelease.objects.create(**release, item=item_object)
                 except IntegrityError:
                     continue
@@ -43,6 +60,9 @@ def run(*args):
                 last_release = releases[len(releases) - 1]
                 if "tender" in last_release and "title" in last_release.get("tender"):
                     item_object.name = last_release.get("tender").get("title")
-                    item_object.save()
+
+                item_object.contract_value = contract_value
+                item_object.contract_currency = contract_currency
+                item_object.save()
 
     shutil.rmtree(os.path.join("data"))

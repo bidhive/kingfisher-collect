@@ -1,4 +1,6 @@
-from django.db.models import Q, QuerySet
+from datetime import timedelta
+from django.db.models import Q, QuerySet, Sum
+from django.utils import timezone
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import action
 from rest_framework.viewsets import ModelViewSet
@@ -30,5 +32,24 @@ class TenderViewSet(ModelViewSet):
     @action(detail=False, methods=["GET"])
     def countries(self, request):
         countries = dict((x, y) for x, y in Tender.country_choices)
-        response = Response(data=countries, status=status.HTTP_200_OK)
-        return response
+        return Response(data=countries, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=["GET"])
+    def metrics(self, request):
+        total_count = Tender.objects.count()
+        total_contract_value = Tender.objects.aggregate(Sum("contract_value"))[
+            "contract_value__sum"
+        ]
+        data = {
+            "total_count": total_count,
+            "total_contract_value": total_contract_value,
+        }
+        return Response(data=data)
+
+    @action(detail=False, methods=["GET"], url_path="todays-opportunities")
+    def todays_opportunities(self, request):
+        tenders = self.get_queryset().filter(
+            publishedDate__gte=timezone.now() - timedelta(days=1)
+        )
+        serializer = TenderSerializer(tenders, many=True)
+        return Response(serializer.data)
