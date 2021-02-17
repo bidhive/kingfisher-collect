@@ -49,7 +49,7 @@ class TenderViewSet(ModelViewSet):
     @action(detail=False, methods=["GET"], url_path="todays-opportunities")
     def todays_opportunities(self, request):
         tenders = self.get_queryset().filter(
-            publishedDate__gte=timezone.now() - timedelta(days=1)
+            published_date__gte=timezone.now() - timedelta(days=1)
         )
         serializer = TenderSerializer(tenders, many=True)
         return Response(serializer.data)
