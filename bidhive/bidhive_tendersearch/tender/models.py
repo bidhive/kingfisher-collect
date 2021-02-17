@@ -18,15 +18,16 @@ class Tender(models.Model):
     contract_value = models.PositiveIntegerField(null=True)
     contract_currency = models.CharField(max_length=3, null=True)
     publisher = models.JSONField()
-    published_date = models.DateTimeField()
     license = models.CharField(max_length=1024)
     version = models.CharField(max_length=1024)
     extensions = models.JSONField(null=True)
     links = models.JSONField(null=True)
     publication_policy = models.JSONField(null=True)
 
+    published_date = models.DateTimeField()
     start_date = models.DateTimeField(null=True)
     end_date = models.DateTimeField(null=True)
+    deadline_date = models.DateTimeField(null=True)
 
     # { id: string; name: string; }
     procuring_entity = models.JSONField(null=True)

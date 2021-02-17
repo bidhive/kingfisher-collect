@@ -7,7 +7,7 @@ from django.db.utils import IntegrityError
 from bidhive_tendersearch.models import Tender, TenderRelease
 from utils import read_dirs
 
-DEFAULT_TENDER_COUNT = 10
+DEFAULT_TENDER_COUNT = 100
 DEFAULT_FROM_DATE = "2021-02-01"
 DEFAULT_ZONE = "australia"
 
@@ -38,6 +38,7 @@ def run(*args):
 
             # Keep consistent cases
             item["published_date"] = item.pop("publishedDate", None)
+            item["deadline_date"] = item.pop("deadlineDate", None)
             item["publication_policy"] = item.pop("publicationPolicy", None)
 
             item_object = Tender.objects.create(country=zone, **item)
@@ -68,6 +69,8 @@ def run(*args):
                 last_release = releases[len(releases) - 1]
                 if "tender" in last_release:
                     tender = last_release.get("tender")
+                    # Some releases have the title as a direct property, some have it under the tender property
+                    item_object.name = last_release.get("title", tender.get("title"))
                     item_object.name = tender.get("title", None)
 
                     contract_period = tender.get("contractPeriod")
@@ -109,6 +112,6 @@ def run(*args):
                 item_object.buyer = last_release.get("buyer")
                 item_object.save()
 
-                TenderRelease.objects.create(**last_release, item=item_object)
+                # TenderRelease.objects.create(**last_release, item=item_object)
 
-    # shutil.rmtree(os.path.join("data"))
+    shutil.rmtree(os.path.join("data"))
