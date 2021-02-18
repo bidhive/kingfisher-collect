@@ -55,6 +55,7 @@ class TenderSerializer(DisableCreateUpdateSerializer):
         model = Tender
         fields = (
             "id",
+            "name",
             "country",
             "uri",
             "publisher",
