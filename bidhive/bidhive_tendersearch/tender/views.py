@@ -23,9 +23,21 @@ class TenderViewSet(ModelViewSet):
         query = request.data.get("query")
         tenders = self.get_queryset().filter(
             Q(name__icontains=query)
-            | Q(country__icontains=query)
+            | Q(country__iexact=query)
             | Q(publisher__name__icontains=query)
         )
+
+        awards_query = self.get_queryset().filter(
+            awards__len__gte=1, awards__contains=[{"suppliers": [{"name": query}]}]
+        )
+        parties_query = self.get_queryset().filter(
+            parties__len__gte=1, parties__contains=[{"name": query}]
+        )
+        tenderers_query = self.get_queryset().filter(
+            tenderers__len__gte=1, tenderers__contains=[{"name": query}]
+        )
+        tenders = tenders.union(awards_query, parties_query, tenderers_query)
+
         serializer = TenderSerializer(tenders, many=True)
         return Response(data=serializer.data)
 
