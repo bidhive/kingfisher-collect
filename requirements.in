@@ -12,4 +12,3 @@ scrapyd-client
 sentry-sdk
 treq
 twisted
-flask
