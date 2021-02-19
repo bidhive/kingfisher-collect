@@ -41,7 +41,7 @@ def run(*args):
             item["deadline_date"] = item.pop("deadlineDate", None)
             item["publication_policy"] = item.pop("publicationPolicy", None)
 
-            item_object = Tender.objects.create(country=zone, **item)
+            item_object = Tender(country=zone, **item)
             contract_value = None
             contract_currency = None
 
@@ -72,7 +72,7 @@ def run(*args):
                     # Some releases have the title as a direct property, some have it under the tender property
                     item_object.name = last_release.get("title", tender.get("title"))
                     item_object.name = tender.get("title", None)
-                    item_object.tender_id = tender.get("id")
+                    item_object.id = tender.get("id")
 
                     contract_period = tender.get("contractPeriod")
                     if contract_period is not None:

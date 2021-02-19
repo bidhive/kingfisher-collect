@@ -10,7 +10,7 @@ class Tender(models.Model):
         ("uk_contracts_finder", "United Kingdom"),
         ("italy", "Italy"),
     )
-    tender_id = models.CharField(max_length=1024, null=True, unique=True)
+    id = models.CharField(max_length=1024, primary_key=True)
     name = models.CharField(max_length=1024, null=True)
     uri = models.CharField(max_length=1024)
     # Where countries are sourced from via scrapy
