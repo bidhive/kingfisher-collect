@@ -1,19 +1,39 @@
 from datetime import timedelta
 from django.db.models import Q, QuerySet, Sum
 from django.utils import timezone
+from django_filters import rest_framework as df_filters
 from rest_framework.permissions import AllowAny
 from rest_framework.decorators import action
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.views import status
 from rest_framework.response import Response
+from rest_framework.filters import OrderingFilter
 
 from .models import Tender
 from .serializers import TenderSerializer
+from .utils import DefaultPagination, SubstringSearchFilter
 
 
+class TenderFilterSet(df_filters.FilterSet):
+    class Meta:
+        model = Tender
+        fields = ("name", "country", "publisher__name")
+
+
+# TODO(alec): Implement pagination
 class TenderViewSet(ModelViewSet):
     serializer_class = TenderSerializer
     permission_classes = (AllowAny,)
+    pagination_class = DefaultPagination
+    filter_class = TenderFilterSet
+    filter_backends = (
+        SubstringSearchFilter,
+        df_filters.DjangoFilterBackend,
+        OrderingFilter,
+    )
+    search_fields = ("name", "country", "publisher__name")
+    ordering_fields = ["id", "name", "published_date"]
+    ordering = ["published_date"]
 
     def get_queryset(self):
         return Tender.objects.all()
