@@ -72,6 +72,7 @@ def run(*args):
                     # Some releases have the title as a direct property, some have it under the tender property
                     item_object.name = last_release.get("title", tender.get("title"))
                     item_object.name = tender.get("title", None)
+                    item_object.tender_id = tender.get("id")
 
                     contract_period = tender.get("contractPeriod")
                     if contract_period is not None:
@@ -110,8 +111,14 @@ def run(*args):
                 item_object.contracts = last_release.get("contracts")
                 item_object.planning = last_release.get("planning")
                 item_object.buyer = last_release.get("buyer")
+                item_object.description = last_release.get("description")
                 item_object.save()
 
-                # TenderRelease.objects.create(**last_release, item=item_object)
+                if "title" in last_release:
+                    last_release.pop("title")
 
-    shutil.rmtree(os.path.join("data"))
+                if "description" in last_release:
+                    last_release.pop("description")
+                TenderRelease.objects.create(**last_release, item=item_object)
+
+    # shutil.rmtree(os.path.join("data"))

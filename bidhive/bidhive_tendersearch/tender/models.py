@@ -10,13 +10,14 @@ class Tender(models.Model):
         ("uk_contracts_finder", "United Kingdom"),
         ("italy", "Italy"),
     )
-
+    tender_id = models.CharField(max_length=1024, null=True, unique=True)
     name = models.CharField(max_length=1024, null=True)
     uri = models.CharField(max_length=1024)
     # Where countries are sourced from via scrapy
     country = models.CharField(max_length=1024, null=True, choices=country_choices)
     contract_value = models.PositiveIntegerField(null=True)
     contract_currency = models.CharField(max_length=3, null=True)
+    description = models.TextField(null=True)
     publisher = models.JSONField()
     license = models.CharField(max_length=1024)
     version = models.CharField(max_length=1024)
