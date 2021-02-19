@@ -114,11 +114,6 @@ def run(*args):
                 item_object.description = last_release.get("description")
                 item_object.save()
 
-                if "title" in last_release:
-                    last_release.pop("title")
-
-                if "description" in last_release:
-                    last_release.pop("description")
-                TenderRelease.objects.create(**last_release, item=item_object)
+                # TenderRelease.objects.create(**last_release, item=item_object)
 
     # shutil.rmtree(os.path.join("data"))
