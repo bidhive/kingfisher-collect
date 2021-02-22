@@ -40,7 +40,7 @@ class Tender(models.Model):
     deadline_date = models.DateTimeField(null=True)
 
     # { id: string; name: string; }
-    procuring_entity = models.JSONField(null=True)
+    customer = models.JSONField(null=True)
     procurement_method = models.CharField(max_length=1024, null=True)
     procurement_method_details = models.TextField(null=True)
 

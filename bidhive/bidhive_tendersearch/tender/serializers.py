@@ -74,7 +74,7 @@ class TenderSerializer(DisableCreateUpdateSerializer):
             "extensions",
             "links",
             "latest_release",
-            "procuring_entity",
+            "customer",
             "procurement_method",
             "procurement_method_details",
             "tag",

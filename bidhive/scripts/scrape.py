@@ -35,7 +35,7 @@ def _process_tender(item: Tender, tender: dict, last_release: dict):
             )
             item.end_date = end_date
 
-    item.procuring_entity = tender.get("procuringEntity")
+    item.customer = tender.get("procuringEntity")
     item.procurement_method = tender.get("procurementMethod")
     item.procurement_method_details = tender.get("procurementMethodDetails", None)
     item.tenderers = tender.get("tenderers", None)
