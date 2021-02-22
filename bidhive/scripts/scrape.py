@@ -113,7 +113,7 @@ def run(*args):
                 item_object.buyer = last_release.get("buyer")
 
                 if item_object.description is None:
-                item_object.description = last_release.get("description")
+                    item_object.description = last_release.get("description")
 
                 item_object.save()
 
