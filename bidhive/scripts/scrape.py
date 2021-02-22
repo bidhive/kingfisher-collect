@@ -46,6 +46,7 @@ def _process_tender(item: Tender, tender: dict, last_release: dict):
     item.submission_method = tender.get("submissionMethod")
     item.submission_method_details = tender.get("submissionMethodDetails")
     item.address_for_lodgement = tender.get("addressForLodgement")
+    item.type = tender.get("inheritanceType")
 
 
 def run(*args):

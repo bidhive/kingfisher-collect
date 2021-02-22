@@ -25,6 +25,7 @@ class Tender(models.Model):
     submission_method = models.JSONField(null=True)
     submission_method_details = models.TextField(null=True)
     address_for_lodgement = models.TextField(null=True)
+    type = models.CharField(max_length=1024, null=True)
 
     publisher = models.JSONField()
     license = models.CharField(max_length=1024)

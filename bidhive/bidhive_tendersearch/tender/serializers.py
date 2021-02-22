@@ -66,6 +66,7 @@ class TenderSerializer(DisableCreateUpdateSerializer):
             "address_for_lodgement",
             "country",
             "uri",
+            "type",
             "publisher",
             "published_date",
             "license",
