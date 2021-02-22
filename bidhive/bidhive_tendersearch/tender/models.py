@@ -4,6 +4,9 @@ from django.contrib.postgres.fields import ArrayField
 
 
 class Tender(models.Model):
+    # NOTE(alec): Many of the JSONFields can be either a JSON object/array or a string
+    # with no real way of telling which way when loading the scraped data
+
     country_choices = (
         ("australia", "Australia"),
         ("australia_nsw", "New South Wales"),
@@ -18,6 +21,11 @@ class Tender(models.Model):
     contract_value = models.PositiveIntegerField(null=True)
     contract_currency = models.CharField(max_length=3, null=True)
     description = models.TextField(null=True)
+    status = models.CharField(max_length=1024, null=True)
+    submission_method = models.JSONField(null=True)
+    submission_method_details = models.TextField(null=True)
+    address_for_lodgement = models.TextField(null=True)
+
     publisher = models.JSONField()
     license = models.CharField(max_length=1024)
     version = models.CharField(max_length=1024)
@@ -41,6 +49,8 @@ class Tender(models.Model):
     contracts = ArrayField(models.JSONField(), default=list, null=True)
     planning = models.JSONField(null=True)
     buyer = models.JSONField(null=True)
+    documents = models.JSONField(null=True)
+    amendments = models.JSONField(null=True)
 
     # { id: string; name: string; address?: Address; identifier?: { legalName: string; } }[]
     tenderers = models.JSONField(null=True)

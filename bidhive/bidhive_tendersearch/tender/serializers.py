@@ -44,12 +44,15 @@ class TenderSerializer(DisableCreateUpdateSerializer):
     extensions = serializers.JSONField()
     links = serializers.JSONField()
     latest_release = serializers.SerializerMethodField()
-    tenderers = serializers.JSONField()
     parties = serializers.JSONField()
     awards = serializers.JSONField()
     contracts = serializers.JSONField()
     planning = serializers.JSONField()
     buyer = serializers.JSONField()
+    submission_method = serializers.JSONField()
+    tenderers = serializers.JSONField()
+    documents = serializers.JSONField()
+    amendments = serializers.JSONField()
 
     class Meta:
         model = Tender
@@ -57,6 +60,10 @@ class TenderSerializer(DisableCreateUpdateSerializer):
             "id",
             "name",
             "description",
+            "status",
+            "submission_method",
+            "submission_method_details",
+            "address_for_lodgement",
             "country",
             "uri",
             "publisher",
@@ -76,6 +83,8 @@ class TenderSerializer(DisableCreateUpdateSerializer):
             "planning",
             "buyer",
             "tenderers",
+            "documents",
+            "amendments",
         )
 
     def get_latest_release(self, instance: Tender):

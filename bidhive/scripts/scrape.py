@@ -16,6 +16,38 @@ TIME_FORMAT = "%Y-%m-%dT%H:%M:%SZ"
 TIME_FORMAT_TZ = "%Y-%m-%d%zT%H:%M:%SZ"
 
 
+def _process_tender(item: Tender, tender: dict, last_release: dict):
+    # Some releases have the title as a direct property, some have it under the tender property
+    item.name = last_release.get("title", tender.get("title"))
+    item.id = tender.get("id")
+    contract_period = tender.get("contractPeriod") or tender.get("tenderPeriod")
+    if isinstance(contract_period, dict):
+        start_date_str = contract_period.get("startDate")
+        end_date_str = contract_period.get("endDate")
+        if start_date_str is not None:
+            start_date = datetime.strptime(
+                start_date_str, TIME_FORMAT_TZ if "+" in start_date_str else TIME_FORMAT
+            )
+            item.start_date = start_date
+        if end_date_str is not None:
+            end_date = datetime.strptime(
+                end_date_str, TIME_FORMAT_TZ if "+" in end_date_str else TIME_FORMAT
+            )
+            item.end_date = end_date
+
+    item.procuring_entity = tender.get("procuringEntity")
+    item.procurement_method = tender.get("procurementMethod")
+    item.procurement_method_details = tender.get("procurementMethodDetails", None)
+    item.tenderers = tender.get("tenderers", None)
+    item.documents = tender.get("documents")
+    item.amendments = tender.get("amendments")
+    item.status = tender.get("status")
+    item.description = tender.get("description")
+    item.submission_method = tender.get("submissionMethod")
+    item.submission_method_details = tender.get("submissionMethodDetails")
+    item.address_for_lodgement = tender.get("addressForLodgement")
+
+
 def run(*args):
     if "clean" in args:
         Tender.objects.all().delete()
@@ -60,47 +92,15 @@ def run(*args):
                                     )
 
                                 contract_currency = value.get("currency")
-
-                    # TenderRelease.objects.create(**release, item=item_object)
                 except IntegrityError:
                     continue
 
             if len(releases) > 0:
                 last_release = releases[len(releases) - 1]
                 if "tender" in last_release:
-                    tender = last_release.get("tender")
-                    # Some releases have the title as a direct property, some have it under the tender property
-                    item_object.name = last_release.get("title", tender.get("title"))
-                    item_object.name = tender.get("title", None)
-                    item_object.id = tender.get("id")
-
-                    contract_period = tender.get("contractPeriod")
-                    if contract_period is not None:
-                        if "startDate" in contract_period:
-                            start_date_str = contract_period.get("startDate")
-                            start_date = datetime.strptime(
-                                start_date_str,
-                                TIME_FORMAT_TZ
-                                if "+" in start_date_str
-                                else TIME_FORMAT,
-                            )
-                            item_object.start_date = start_date
-                        if "endDate" in contract_period:
-                            end_date_str = contract_period.get("endDate")
-                            end_date = datetime.strptime(
-                                end_date_str,
-                                TIME_FORMAT_TZ
-                                if "+" in start_date_str
-                                else TIME_FORMAT,
-                            )
-                            item_object.end_date = end_date
-
-                    item_object.procuring_entity = tender.get("procuringEntity")
-                    item_object.procurement_method = tender.get("procurementMethod")
-                    item_object.procurement_method_details = tender.get(
-                        "procurementMethodDetails", None
+                    _process_tender(
+                        item_object, last_release.get("tender"), last_release
                     )
-                    item_object.tenderers = tender.get("tenderers", None)
 
                 item_object.contract_value = contract_value
                 item_object.contract_currency = contract_currency
@@ -111,7 +111,10 @@ def run(*args):
                 item_object.contracts = last_release.get("contracts")
                 item_object.planning = last_release.get("planning")
                 item_object.buyer = last_release.get("buyer")
+
+                if item_object.description is None:
                 item_object.description = last_release.get("description")
+
                 item_object.save()
 
                 # TenderRelease.objects.create(**last_release, item=item_object)
