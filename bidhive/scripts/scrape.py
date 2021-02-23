@@ -7,8 +7,8 @@ from django.db.utils import IntegrityError
 from bidhive_tendersearch.models import Tender, TenderRelease
 from utils import read_dirs
 
-DEFAULT_TENDER_COUNT = 200
-DEFAULT_FROM_DATE = "2021-02-11"
+DEFAULT_TENDER_COUNT = 1000
+DEFAULT_FROM_DATE = "2020-05-01"
 DEFAULT_ZONE = "australia"
 
 ZONES = [country[0] for country in Tender.country_choices]
