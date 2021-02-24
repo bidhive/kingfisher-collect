@@ -15,12 +15,26 @@ from .utils import DefaultPagination, SubstringSearchFilter
 
 
 class TenderFilterSet(df_filters.FilterSet):
+    value_lte = df_filters.NumberFilter(field_name="contract_value", lookup_expr="lte")
+    value_gte = df_filters.NumberFilter(field_name="contract_value", lookup_expr="gte")
+    from_date = df_filters.DateTimeFilter(
+        field_name="published_date", lookup_expr="gte"
+    )
+    to_date = df_filters.DateTimeFilter(field_name="published_date", lookup_expr="lte")
+
     class Meta:
         model = Tender
-        fields = ("name", "country", "publisher__name")
+        fields = (
+            "name",
+            "country",
+            "publisher__name",
+            "value_lte",
+            "value_gte",
+            "from_date",
+            "to_date",
+        )
 
 
-# TODO(alec): Implement pagination
 class TenderViewSet(ModelViewSet):
     serializer_class = TenderSerializer
     permission_classes = (AllowAny,)
@@ -31,9 +45,9 @@ class TenderViewSet(ModelViewSet):
         df_filters.DjangoFilterBackend,
         OrderingFilter,
     )
-    search_fields = ("name", "country", "publisher__name")
+    search_fields = ("name", "country", "publisher__name", "contract_value")
     ordering_fields = ["id", "name", "published_date"]
-    ordering = ["published_date"]
+    ordering = ["-published_date"]
 
     def get_queryset(self):
         return Tender.objects.all()
