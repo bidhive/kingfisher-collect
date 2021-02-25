@@ -51,6 +51,8 @@ def _process_tender(item: Tender, tender: dict, last_release: dict):
 
 
 def run(*args):
+    from_date = DEFAULT_FROM_DATE
+
     if "clean" in args:
         Tender.objects.all().delete()
 
