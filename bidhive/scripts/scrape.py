@@ -1,14 +1,15 @@
 import os
 import subprocess
 import shutil
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.db.utils import IntegrityError
+from django.utils import timezone
 from bidhive_tendersearch.models import Tender, TenderRelease
 from utils import read_dirs
 
 DEFAULT_TENDER_COUNT = 1000
-DEFAULT_FROM_DATE = "2020-05-01"
+from_date = DEFAULT_FROM_DATE = "2020-05-01"
 DEFAULT_ZONE = "australia"
 
 ZONES = [country[0] for country in Tender.country_choices]
@@ -53,10 +54,13 @@ def run(*args):
     if "clean" in args:
         Tender.objects.all().delete()
 
+    if "today" in args:
+        from_date = (timezone.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+
     if "scrape" in args:
         for zone in ZONES:
             subprocess.call(
-                f"scrapy crawl {zone} -a from_date={DEFAULT_FROM_DATE} -a sample={DEFAULT_TENDER_COUNT}",
+                f"scrapy crawl {zone} -a from_date={from_date} -a sample={DEFAULT_TENDER_COUNT}",
                 shell=True,
             )
 
