@@ -182,3 +182,16 @@ zope.interface==5.2.0
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
+
+# Bidhive Django libraries
+Django==3.1
+celery==4.4.7
+django-cors-headers==3.4.0
+django-extensions==3.0.5
+django-filter==2.3.0
+django-macros==0.4.0
+djangorestframework==3.11.1
+django-autoslug==1.9.8
+drf-nested-routers==0.91
+pyquery==1.4.1
+psycopg2-binary==2.8.6
