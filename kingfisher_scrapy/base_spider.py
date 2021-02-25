@@ -1,3 +1,4 @@
+import codecs
 import os
 from abc import abstractmethod
 from datetime import datetime
@@ -168,7 +169,7 @@ class BaseSpider(scrapy.Spider):
     def build_request(self, url, formatter, **kwargs):
         """
         Returns a Scrapy request, with a file name added to the request's ``meta`` attribute. If the file name doesn't
-        have a ``.json`` or ``.zip`` extension, it adds a ``.json`` extension.
+        have a ``.json``, ``.csv``, ``.xlsx``, ``.rar`` or ``.zip`` extension, it adds a ``.json`` extension.
 
         If the last component of a URL's path is unique, use it as the file name. For example:
 
@@ -201,7 +202,7 @@ class BaseSpider(scrapy.Spider):
         :rtype: scrapy.Request
         """
         file_name = formatter(url)
-        if not file_name.endswith(('.json', '.zip', '.xlsx', '.csv', '.rar')):
+        if not file_name.endswith(('.json', '.csv', '.xlsx', '.rar', '.zip')):
             file_name += '.json'
         meta = {'file_name': file_name}
         if 'meta' in kwargs:
@@ -211,10 +212,17 @@ class BaseSpider(scrapy.Spider):
     def build_file_from_response(self, response, **kwargs):
         """
         Returns a File item to yield, based on the response to a request.
+
+        If the response body starts with a byte-order mark, it is removed.
         """
         kwargs.setdefault('file_name', response.request.meta['file_name'])
         kwargs.setdefault('url', response.request.url)
-        kwargs.setdefault('data', response.body)
+        if 'data' not in kwargs:
+            body = response.body
+            # https://tools.ietf.org/html/rfc7159#section-8.1
+            if body.startswith(codecs.BOM_UTF8):
+                body = body[len(codecs.BOM_UTF8):]
+            kwargs['data'] = body
         return self.build_file(**kwargs)
 
     def build_file(self, *, file_name=None, url=None, data=None, data_type=None, encoding='utf-8'):
@@ -325,34 +333,42 @@ class CompressedFileSpider(BaseSpider):
         else:
             raise UnknownArchiveFormatError(response.request.meta['file_name'])
 
-        archive_file = cls(BytesIO(response.body))
-        for file_info in archive_file.infolist():
-            filename = file_info.filename
-            basename = os.path.basename(filename)
-            if self.file_name_must_contain not in basename:
-                continue
-            if archive_format == 'rar' and file_info.isdir():
-                continue
-            if archive_format == 'zip' and file_info.is_dir():
-                continue
-            if not basename.endswith('.json'):
-                basename += '.json'
+        with cls(BytesIO(response.body)) as archive_file:
+            number = 1
+            for file_info in archive_file.infolist():
+                # Avoid reading the rest of a large file, since the rest of the items will be dropped.
+                if self.sample and number > self.sample:
+                    break
 
-            compressed_file = archive_file.open(filename)
-            # If `resize_package = True`, then we need to open the file twice: once to extract the package metadata and
-            # then to extract the releases themselves.
-            if self.resize_package:
-                data = {'data': compressed_file, 'package': archive_file.open(filename)}
-            else:
-                data = compressed_file
+                filename = file_info.filename
+                basename = os.path.basename(filename)
+                if self.file_name_must_contain not in basename:
+                    continue
+                if archive_format == 'rar' and file_info.isdir():
+                    continue
+                if archive_format == 'zip' and file_info.is_dir():
+                    continue
+                if not basename.endswith('.json'):
+                    basename += '.json'
 
-            yield File({
-                'file_name': basename,
-                'data': data,
-                'data_type': self.data_type,
-                'url': response.request.url,
-                'encoding': self.encoding
-            })
+                compressed_file = archive_file.open(filename)
+
+                # If `resize_package = True`, then we need to open the file twice: once to extract the package metadata
+                # and then to extract the releases themselves.
+                if self.resize_package:
+                    data = {'data': compressed_file, 'package': archive_file.open(filename)}
+                else:
+                    data = compressed_file
+
+                yield File({
+                    'file_name': basename,
+                    'data': data,
+                    'data_type': self.data_type,
+                    'url': response.request.url,
+                    'encoding': self.encoding
+                })
+
+                number += 1
 
 
 class LinksSpider(SimpleSpider):
@@ -380,7 +396,7 @@ class LinksSpider(SimpleSpider):
             data_type = 'release_package'
 
             def start_requests(self):
-                yield scrapy.Request('https://example.com/api/packages.json', meta={'file_name': 'page1.json'})
+                yield scrapy.Request('https://example.com/api/packages.json', meta={'file_name': 'page-1.json'})
 
     """
 
