@@ -17,14 +17,10 @@ from django.contrib import admin
 from django.urls import path, include
 from rest_framework_nested import routers
 
-from bidhive_tendersearch.tender.views import TenderViewSet
-from .views import ping
+from bidhive_tendersearch.tender.views import TenderViewSet, RecentTenderViewSet
 
 router = routers.SimpleRouter()
 router.register("tender", TenderViewSet, basename="tender")
+router.register("recent-tender", RecentTenderViewSet, basename="recent-tender")
 
-urlpatterns = [
-    path("admin/", admin.site.urls),
-    path("ping/", ping),
-    path("", include(router.urls)),
-]
+urlpatterns = [path("admin/", admin.site.urls), path("", include(router.urls))]

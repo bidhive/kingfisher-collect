@@ -1,5 +1,5 @@
 from datetime import timedelta
-from django.db.models import Q, QuerySet, Sum
+from django.db.models import Q, Sum
 from django.utils import timezone
 from django_filters import rest_framework as df_filters
 from rest_framework.permissions import AllowAny
@@ -82,8 +82,9 @@ class TenderViewSet(ModelViewSet):
 
     @action(detail=False, methods=["GET"])
     def metrics(self, request):
-        total_count = Tender.objects.count()
-        total_contract_value = Tender.objects.aggregate(Sum("contract_value"))[
+        tenders = self.get_queryset()
+        total_count = tenders.count()
+        total_contract_value = tenders.aggregate(Sum("contract_value"))[
             "contract_value__sum"
         ]
         data = {
@@ -92,10 +93,13 @@ class TenderViewSet(ModelViewSet):
         }
         return Response(data=data)
 
-    @action(detail=False, methods=["GET"], url_path="todays-opportunities")
-    def todays_opportunities(self, request):
-        tenders = self.get_queryset().filter(
+
+class RecentTenderViewSet(TenderViewSet):
+    def get_queryset(self):
+        return Tender.objects.filter(
             published_date__gte=timezone.now() - timedelta(days=1)
         )
-        serializer = TenderSerializer(tenders, many=True)
-        return Response(serializer.data)
+
+    @action(detail=False, methods=["GET"])
+    def count(self, request):
+        return Response(data={"count": self.get_queryset().count()})
