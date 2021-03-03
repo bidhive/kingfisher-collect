@@ -8,4 +8,6 @@ def scrape_todays_tenders(now=timezone.now()):
     """
     Removes saved content library nodes which are more than two weeks old
     """
-    perform_scrape(now=now, today=True, scrape=True, purge_data=True, via_celery=True)
+    perform_scrape(
+        now=now, today=True, scrape=True, purge_data=True, via_celery=True, sample=10
+    )

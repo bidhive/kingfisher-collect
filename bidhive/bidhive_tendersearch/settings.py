@@ -151,6 +151,6 @@ CELERY_BROKER_URL = "redis://{}:{}/0".format(REDIS_HOST, REDIS_PORT)
 CELERY_BEAT_SCHEDULE = {
     "scrape-tenders": {
         "task": "bidhive_tendersearch.tender.tasks.scrape_todays_tenders",
-        "schedule": 5,  # crontab(hour="*/24"),
+        "schedule": crontab(hour="*/24"),
     }
 }

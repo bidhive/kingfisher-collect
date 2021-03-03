@@ -85,14 +85,15 @@ def perform_scrape(
                 command += f"-a until_date={to_date} "
             logger.info(command)
             if via_celery:
-                output = subprocess.check_output(command, shell=True)
+                subprocess.check_output(command, shell=True)
             else:
                 subprocess.call(command, shell=True)
-    return
+
+    data_path = "data"
     for zone in ZONES:
         path = zone + "_sample"
         logger.debug(f"Loading tenders for path: {path}")
-        path = os.path.join("data", path)
+        path = os.path.join(data_path, path)
         items = read_dirs(path)
 
         for item in items:
@@ -150,4 +151,4 @@ def perform_scrape(
                 # TenderRelease.objects.create(**last_release, item=item_object)
 
     if purge_data:
-        shutil.rmtree(os.path.join("data"))
+        shutil.rmtree(data_path)
