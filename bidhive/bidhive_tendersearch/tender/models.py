@@ -10,8 +10,8 @@ class Tender(models.Model):
     country_choices = (
         ("australia", "Australia"),
         ("australia_nsw", "New South Wales"),
-        ("uk_contracts_finder", "United Kingdom"),
-        ("italy", "Italy"),
+        # ("uk_contracts_finder", "United Kingdom"),
+        # ("italy", "Italy"),
     )
     id = models.CharField(max_length=1024, primary_key=True)
     name = models.CharField(max_length=1024, null=True)

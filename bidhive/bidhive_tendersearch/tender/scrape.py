@@ -62,13 +62,14 @@ def perform_scrape(
     to_date=None,
     sample=DEFAULT_TENDER_COUNT,
     purge_data=False,
+    via_celery=False,
 ):
     if from_date is None:
         from_date = DEFAULT_FROM_DATE
 
     if today:
         # NOTE(alec): Only use the today argument if from_date is not given
-        print("Scraping today's tenders")
+        logger.info("Scraping today's tenders")
         from_date = (now - timedelta(days=1)).strftime("%Y-%m-%d")
 
     if clean:
@@ -76,17 +77,18 @@ def perform_scrape(
 
     if scrape:
         for zone in ZONES:
-            command = f"scrape crawl {zone} -a sample={sample} "
-            print(command)
-            return
+            command = f"scrapy crawl {zone} -a sample={sample} "
             if from_date:
                 command += f"-a from_date={from_date} "
 
             if to_date:
                 command += f"-a until_date={to_date} "
-
-            subprocess.call(command, shell=True)
-
+            logger.info(command)
+            if via_celery:
+                output = subprocess.check_output(command, shell=True)
+            else:
+                subprocess.call(command, shell=True)
+    return
     for zone in ZONES:
         path = zone + "_sample"
         logger.debug(f"Loading tenders for path: {path}")

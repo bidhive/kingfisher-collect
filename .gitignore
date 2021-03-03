@@ -15,3 +15,4 @@ venv/
 
 
 /bidhive/data
+/bidhive/celerybeat-schedule.db
