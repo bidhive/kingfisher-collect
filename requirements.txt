@@ -185,7 +185,7 @@ zope.interface==5.2.0
 
 # Bidhive Django libraries
 Django==3.1
-celery==4.4.7
+celery==5.0.5
 django-cors-headers==3.4.0
 django-extensions==3.0.5
 django-filter==2.3.0
@@ -195,3 +195,4 @@ django-autoslug==1.9.8
 drf-nested-routers==0.91
 pyquery==1.4.1
 psycopg2-binary==2.8.6
+redis==3.5.3

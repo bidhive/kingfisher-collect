@@ -9,7 +9,8 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
-
+import os
+from celery.schedules import crontab
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -139,3 +140,17 @@ CORS_ALLOW_HEADERS = (
     "x-csrftoken",
     "x-requested-with",
 )
+
+#
+# Celery
+#
+
+REDIS_HOST = os.environ.get("ELASTICACHE_URL", "localhost")
+REDIS_PORT = 6379
+CELERY_BROKER_URL = "redis://{}:{}/0".format(REDIS_HOST, REDIS_PORT)
+CELERY_BEAT_SCHEDULE = {
+    "scrape-tenders": {
+        "task": "bidhive_tendersearch.tender.tasks.scrape_todays_tenders",
+        "schedule": 5,  # crontab(hour="*/24"),
+    }
+}

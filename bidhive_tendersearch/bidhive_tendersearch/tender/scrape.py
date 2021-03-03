@@ -1,15 +1,18 @@
 import os
 import subprocess
 import shutil
+import logging
 from datetime import datetime, timedelta
 
 from django.db.utils import IntegrityError
 from django.utils import timezone
-from bidhive_tendersearch.models import Tender, TenderRelease
 from utils import read_dirs
+from .models import Tender, TenderRelease
 
-DEFAULT_TENDER_COUNT = 1000
-from_date = DEFAULT_FROM_DATE = "2020-05-01"
+logger = logging.getLogger()
+
+DEFAULT_TENDER_COUNT = 2000
+DEFAULT_FROM_DATE = "2015-05-01"
 DEFAULT_ZONE = "australia"
 
 ZONES = [country[0] for country in Tender.country_choices]
@@ -50,25 +53,43 @@ def _process_tender(item: Tender, tender: dict, last_release: dict):
     item.type = tender.get("inheritanceType")
 
 
-def run(*args):
-    from_date = DEFAULT_FROM_DATE
+def perform_scrape(
+    now=timezone.now(),
+    clean=False,
+    today=False,
+    scrape=False,
+    from_date=None,
+    to_date=None,
+    sample=DEFAULT_TENDER_COUNT,
+    purge_data=False,
+):
+    if from_date is None:
+        from_date = DEFAULT_FROM_DATE
 
-    if "clean" in args:
+    if today:
+        # NOTE(alec): Only use the today argument if from_date is not given
+        print("Scraping today's tenders")
+        from_date = (now - timedelta(days=1)).strftime("%Y-%m-%d")
+
+    if clean:
         Tender.objects.all().delete()
 
-    if "today" in args:
-        from_date = (timezone.now() - timedelta(days=1)).strftime("%Y-%m-%d")
-
-    if "scrape" in args:
+    if scrape:
         for zone in ZONES:
-            subprocess.call(
-                f"scrapy crawl {zone} -a from_date={from_date} -a sample={DEFAULT_TENDER_COUNT}",
-                shell=True,
-            )
+            command = f"scrape crawl {zone} -a sample={sample} "
+            print(command)
+            return
+            if from_date:
+                command += f"-a from_date={from_date} "
+
+            if to_date:
+                command += f"-a until_date={to_date} "
+
+            subprocess.call(command, shell=True)
 
     for zone in ZONES:
         path = zone + "_sample"
-        print(f"Loading tenders for path: {path}")
+        logger.debug(f"Loading tenders for path: {path}")
         path = os.path.join("data", path)
         items = read_dirs(path)
 
@@ -126,4 +147,5 @@ def run(*args):
 
                 # TenderRelease.objects.create(**last_release, item=item_object)
 
-    # shutil.rmtree(os.path.join("data"))
+    if purge_data:
+        shutil.rmtree(os.path.join("data"))
